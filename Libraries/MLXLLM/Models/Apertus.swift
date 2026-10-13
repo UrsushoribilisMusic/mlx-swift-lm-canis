@@ -355,10 +355,23 @@ public class ApertusModel: Module, LLMModel, KVCacheDimensionProvider {
         cache: [KVCache]? = nil
     ) -> MLXArray {
         let out = model(inputs, cache: cache)
+        return logits(hiddenState: out)
+    }
+
+    public func callAsFunction(
+        _ input: LMInput.Text,
+        cache: [KVCache]?,
+        state: LMOutput.State?
+    ) -> LMOutput {
+        let hiddenState = model(input.tokens, cache: cache)
+        return LMOutput(logits: logits(hiddenState: hiddenState), hiddenState: hiddenState, state: state)
+    }
+
+    private func logits(hiddenState: MLXArray) -> MLXArray {
         if let lmHead {
-            return lmHead(out)
+            return lmHead(hiddenState)
         } else {
-            return model.embedTokens.asLinear(out)
+            return model.embedTokens.asLinear(hiddenState)
         }
     }
 

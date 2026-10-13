@@ -118,6 +118,13 @@ public struct LMOutput {
     /// logits (one hot vector of probabilities for tokens)
     public let logits: MLXArray
 
+    /// Optional final hidden state for the same sequence positions as ``logits``.
+    ///
+    /// Models that expose this can support interpretability/readout layers without
+    /// running a separate forward pass. Callers should treat absence as "not
+    /// available" and fall back to normal text generation behavior.
+    public let hiddenState: MLXArray?
+
     /// optional ``State`` to carry forward into the next step
     public let state: State?
 
@@ -129,8 +136,9 @@ public struct LMOutput {
         }
     }
 
-    public init(logits: MLXArray, state: LMOutput.State? = nil) {
+    public init(logits: MLXArray, hiddenState: MLXArray? = nil, state: LMOutput.State? = nil) {
         self.logits = logits
+        self.hiddenState = hiddenState
         self.state = state
     }
 }
